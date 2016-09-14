@@ -147,8 +147,10 @@ class Updater(object):
 
         self.email_handler = Email(settings)
         self.statistics = Statistics()
-        # XXX: assume that the poky directory is the first entry in the PATH
-        self.git = Git(os.path.dirname(os.getenv('PATH', False).split(':')[0]))
+
+        # XXX: assume that the meta-containos directory is TEMPLATECONF/..
+        self.top_git = Git(os.path.dirname(os.path.dirname(os.getenv('TEMPLATECONF', False))))
+        self.git = Git(os.path.dirname(os.getenv('TEMPLATECONF', False)))
 
         self.opts = {}
         self.opts['interactive'] = not auto_mode
@@ -228,25 +230,25 @@ class Updater(object):
 
         if settings.get("testimage", "no") == "yes":
             if 'testimage' in self.base_env['INHERIT']:
-                if not "ptest" in self.base_env["DISTRO_FEATURES"]:
-                    E(" testimage requires ptest in DISTRO_FEATURES please add to"\
-                      " conf/local.conf.")
-                    exit(1)
+                # if not "ptest" in self.base_env["DISTRO_FEATURES"]:
+                #     E(" testimage requires ptest in DISTRO_FEATURES please add to"\
+                #       " conf/local.conf.")
+                #     exit(1)
 
-                if not "package-management" in self.base_env['EXTRA_IMAGE_FEATURES']:
-                    E(" testimage requires package-management in EXTRA_IMAGE_FEATURES"\
-                      " please add to conf/local.conf.")
-                    exit(1)
+                # if not "package-management" in self.base_env['EXTRA_IMAGE_FEATURES']:
+                #     E(" testimage requires package-management in EXTRA_IMAGE_FEATURES"\
+                #       " please add to conf/local.conf.")
+                #     exit(1)
 
-                if not "ptest-pkgs" in self.base_env['EXTRA_IMAGE_FEATURES']:
-                    E(" testimage/ptest requires ptest-pkgs in EXTRA_IMAGE_FEATURES"\
-                      " please add to conf/local.conf.")
-                    exit(1)
+                # if not "ptest-pkgs" in self.base_env['EXTRA_IMAGE_FEATURES']:
+                #     E(" testimage/ptest requires ptest-pkgs in EXTRA_IMAGE_FEATURES"\
+                #       " please add to conf/local.conf.")
+                #     exit(1)
 
-                if not "package_rpm" == self.base_env["PACKAGE_CLASSES"]:
-                    E(" testimage/ptest requires PACKAGE_CLASSES set to package_rpm"\
-                      " please add to conf/local.conf.")
-                    exit(1)
+                # if not "package_rpm" == self.base_env["PACKAGE_CLASSES"]:
+                #     E(" testimage/ptest requires PACKAGE_CLASSES set to package_rpm"\
+                #       " please add to conf/local.conf.")
+                #     exit(1)
 
                 enabled = True
             else:
@@ -422,7 +424,7 @@ class Updater(object):
             W("No recipes attempted, not sending status mail!")
 
     def _order_pkgs_to_upgrade(self, pkgs_to_upgrade):
-        def _get_pn_dep_dic(pn_list, dependency_file): 
+        def _get_pn_dep_dic(pn_list, dependency_file):
             import re
 
             pn_dep_dic = {}
@@ -494,7 +496,7 @@ class Updater(object):
 
         for pn_ordered in pn_list_ordered:
             for pn, new_ver, maintainer in pkgs_to_upgrade:
-                if pn == pn_ordered: 
+                if pn == pn_ordered:
                     pkgs_to_upgrade_ordered.append([pn, new_ver, maintainer])
 
         return pkgs_to_upgrade_ordered
@@ -783,7 +785,7 @@ class UniverseUpdater(Updater):
         if last_master_commit != cur_master_commit or last_date_checked != current_date or \
                 last_checkpkg_file is None:
             self._check_upstream_versions()
-            last_checkpkg_file = os.path.realpath(get_build_dir() + "/tmp/log/checkpkg.csv")
+            last_checkpkg_file = os.path.realpath(self.bb.env()['LOG_DIR'] + "/checkpkg.csv")
         else:
             I(" Using last checkpkg.csv file since last master commit and last"
               " check date are the same ...")

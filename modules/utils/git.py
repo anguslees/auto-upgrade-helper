@@ -103,3 +103,9 @@ class Git(object):
         if refs is not None:
             cmd += " " + refs
         return self._cmd(cmd)
+
+    def submodule_update(self, init=True):
+        cmd = "submodule update"
+        if init:
+            cmd += " --init"
+        return self._cmd(cmd)

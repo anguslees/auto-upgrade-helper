@@ -98,7 +98,7 @@ class TestImage():
             self._log_error(" testimage: Failed to prepare branch.")
 
         return ok
- 
+
     def _parse_ptest_log(self, log_file):
         ptest_results = {}
 
@@ -126,7 +126,7 @@ class TestImage():
     def _find_log(self, name, machine):
         result = []
 
-        base_dir = os.path.join(os.getenv('BUILDDIR'), 'tmp', 'work')
+        base_dir = self.bb.env()['BASE_WORKDIR']
         for root, dirs, files in os.walk(base_dir):
             if name in files:
                 result.append(os.path.join(root, name))
@@ -172,7 +172,7 @@ class TestImage():
         raise e
 
     def ptest(self, pkgs_ctx, machine):
-        image = 'core-image-minimal'
+        image = 'containos-image-test'
         ptest_pkgs = self._get_ptest_pkgs(pkgs_ctx)
 
         os.environ['CORE_IMAGE_EXTRA_INSTALL'] = \
@@ -195,7 +195,7 @@ class TestImage():
         for pn in ptest_result:
             for pkg_ctx in pkgs_ctx:
                 if not pn == pkg_ctx['PN']:
-                    continue 
+                    continue
 
                 if not 'ptest' in pkg_ctx:
                     pkg_ctx['ptest'] = {}
@@ -274,10 +274,10 @@ class TestImage():
 
                 # remove previous build tmp, sstate to avoid QA errors
                 # on lower versions
-                I("     removing sstate directory ...")
-                shutil.rmtree(os.path.join(get_build_dir(), "sstate-cache"))
+                #I("     removing sstate directory ...")
+                #shutil.rmtree(os.path.join(get_build_dir(), "sstate-cache"))
                 I("     removing tmp directory ...")
-                shutil.rmtree(os.path.join(get_build_dir(), "tmp"))
+                shutil.rmtree(self.bb.env(pkg_ctx['PN'])['TMPDIR'])
 
                 self.pkgs_ctx.remove(pkg_ctx)
 
